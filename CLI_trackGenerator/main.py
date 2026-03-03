@@ -31,7 +31,7 @@ def safe_request(url, headers):
         return None
 
 
-def search_by_genre(genre):
+def search_by_genre(genre, twice):
 
     headers = {
         "User-Agent": "TrackGenerator/1.0 (flaviusepintilie@gmail.com)"
@@ -42,13 +42,13 @@ def search_by_genre(genre):
         headers
     )
 
-    if data is None:
+    if data is None and not twice:
         print("Network error or connection reset.")
         return
 
     tracks_id = data.get("recordings", [])
 
-    if not tracks_id:
+    if not tracks_id and not twice:
         print("No tracks found.")
         return
 
@@ -78,15 +78,20 @@ def search_by_genre(genre):
             )
 
     if not verify:
-        print(
-            f"{CStyle.BRIGHT}{Fore.RED}"
-            f"No or no more tracks found for genre/tag: {genre}"
-            f"{CStyle.RESET_ALL}"
-        )
+        if not twice:
+            print(
+                f"{CStyle.BRIGHT}{Fore.RED}"
+                f"No or no more tracks found for genre/tag: {genre}"
+                f"{CStyle.RESET_ALL}"
+            )
+        return False
+
+    return True
 
 
 def main():
-
+    global minn, maxx
+    run_out = False
     print(fr"""{CStyle.BRIGHT}
 {Fore.MAGENTA}___________                     __       {Fore.GREEN}________                                   __
 {Fore.MAGENTA}\__    ___/___________    ____ |  | __  {Fore.GREEN}/  _____/  ____   ____   ________________ _/  |_  ___________
@@ -144,19 +149,24 @@ They will likely be completely random songs that just happen to have that weird 
                     f"{CStyle.BRIGHT}{Fore.RED}No previous command found. Please enter a genre first.{CStyle.RESET_ALL}")
                 continue
 
-            global minn, maxx
             minn += 10
             maxx += 10
 
-            search_by_genre(previous_command)
+            if not search_by_genre(previous_command, False):
+                run_out = True
 
         else:
-            search_by_genre(command)
 
+            if run_out:
+
+                search_by_genre(command, True)
+                minn = 0
+                maxx = 10
+
+            search_by_genre(command, False)
             previous_command = command
-            minn = 0
-            maxx = 10
 
+            run_out = False
 
-if __name__ == "__main__":
-    main()
+    if __name__ == "__main__":
+        main()
