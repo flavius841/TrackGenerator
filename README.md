@@ -2,7 +2,7 @@
 
 ##  Overview
 
-**TrackGenerator** is a command-line music discovery tool that fetches recordings based on genre or tag using the :contentReference[oaicite:0]{index=0} API.
+**TrackGenerator** is a command-line music discovery tool that fetches recordings based on genre or tag using the MusicBrainz API API.
 
 If you feel stuck during travel or just want vibe-matching music, simply type a genre, country, or random tag and explore tracks instantly.
 
