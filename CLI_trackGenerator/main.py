@@ -3,15 +3,12 @@ import requests
 from colorama import init, Fore, Style as CStyle
 
 
-BASE_URL = "https://api.deezer.com/search"
+BASE_URL = "https://musicbrainz.org/ws/2/recording?query=tag:{genre}&fmt=json"
 
 
 def search_by_genre(genre):
-    params = {
-        "q": f'genre:"{genre}"'
-    }
 
-    response = requests.get(BASE_URL, params=params)
+    response = requests.get(BASE_URL.format(genre=genre))
 
     if response.status_code != 200:
         print("Error fetching data")
@@ -19,16 +16,21 @@ def search_by_genre(genre):
 
     data = response.json()
 
-    tracks = data.get("data", [])
+    tracks_id = data.get("recordings", [])
 
-    if not tracks:
+    if not tracks_id:
         print("No tracks found.")
         return
 
-    for i, track in enumerate(tracks[:10], start=1):
+    for i, track in enumerate(tracks_id[:10], start=1):
         title = track["title"]
-        artist = track["artist"]["name"]
-        print(f"{i}. {title} – {artist}")
+        artist = track["artist-credit"][0]["name"]
+
+        if i < 10:
+            print(f"{CStyle.BRIGHT}{Fore.GREEN}{i}.  {Fore.YELLOW}{title}{CStyle.RESET_ALL} – {CStyle.BRIGHT}{Fore.CYAN}{artist}{CStyle.RESET_ALL}")
+
+        else:
+            print(f"{CStyle.BRIGHT}{Fore.GREEN}{i}. {Fore.YELLOW}{title}{CStyle.RESET_ALL} – {CStyle.BRIGHT}{Fore.CYAN}{artist}{CStyle.RESET_ALL}")
 
 
 def main():
@@ -45,8 +47,13 @@ def main():
           """)
 
     if len(sys.argv) < 2:
-        print("Usage: trackgen <genre>")
-        sys.exit(1)
+        print(f"{CStyle.BRIGHT}{Fore.YELLOW}Welcome to {Fore.GREEN}TrackGenerator{Fore.YELLOW}. Type <help> for more information.{CStyle.RESET_ALL}")
+        while True:
+            command = input(">> ")
+            if command.lower() == 'exit':
+                print("Goodbye!")
+                break
+            search_by_genre(command)
 
     genre = sys.argv[1]
     search_by_genre(genre)
